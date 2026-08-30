@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import tiktoken
 import google.generativeai as genai
+from file_parser import extract_text_from_file
 
 load_dotenv()
 
@@ -32,8 +33,19 @@ def count_all_platforms(text: str) -> dict:
         "gemini": count_tokens_gemini(text),
     }
 
+def count_tokens_for_file(file_path: str) -> dict:
+    extracted_text = extract_text_from_file(file_path)
+    return count_all_platforms(extracted_text)
+
 
 if __name__ == "__main__":
-    user_text = input("Enter your prompt: ")
-    results = count_all_platforms(user_text)
+    choice = input("Type 'text' or 'file': ")
+    
+    if choice == "text":
+        user_text = input("Enter your prompt: ")
+        results = count_all_platforms(user_text)
+    else:
+        file_path = input("Enter file path (e.g. sample.pdf or sample.py): ")
+        results = count_tokens_for_file(file_path)
+    
     print(results)
