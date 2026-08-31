@@ -84,7 +84,53 @@ print(result)
   }
 }
 ```
-### Collaborator: Sarthak Deshmukh (https://github.com/sarthakkkk7)
+## Installation
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package manager)
+- CUDA 11.0+ (optional, for GPU acceleration)
+
+### Setup
+
+Clone the repository:
+```bash
+git clone https://github.com/SanketMohite01/tokcost-project.git
+cd tokcost-project
+```
+
+Install required dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### Required Packages
+- `tiktoken` - Token counting for OpenAI models
+- `torch` - PyTorch for GPU detection and tensor operations
+- `llmlingua` - Microsoft LLMLingua-2 for prompt compression
+- `requests` - HTTP library for API calls
+
+## Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. **Fork** the repository
+2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
+3. **Make your changes** and test thoroughly
+4. **Commit with meaningful messages**: `git commit -m "feat: describe your changes"`
+5. **Push to your fork**: `git push origin feature/your-feature-name`
+6. **Open a Pull Request** with a clear description
+
+### Development Workflow
+- Keep commits atomic and focused
+- Write clear commit messages using conventional commits
+- Test all changes before submitting PRs
+- Ensure code is well-documented
+
+## Collaborators
+- **Sanket Mohite** (SanketMohite01) - Project Owner
+- **Sarthak Deshmukh** (sarthakkkk7) - Co-Contributor
+
 ## Getting Started
 
 Everyone (including you) should now clone the repo locally:
