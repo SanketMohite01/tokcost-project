@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import tiktoken
 import google.generativeai as genai
-from file_parser import extract_text_from_file
+from file_parser import extract_text_from_file, count_image_tokens
 
 load_dotenv()
 
@@ -37,15 +37,21 @@ def count_tokens_for_file(file_path: str) -> dict:
     extracted_text = extract_text_from_file(file_path)
     return count_all_platforms(extracted_text)
 
+def count_tokens_for_image(file_path: str) -> dict:
+    return count_image_tokens(file_path)
+
 
 if __name__ == "__main__":
-    choice = input("Type 'text' or 'file': ")
-    
+    choice = input("Type 'text', 'file', or 'image': ")
+
     if choice == "text":
         user_text = input("Enter your prompt: ")
         results = count_all_platforms(user_text)
+    elif choice == "image":
+        file_path = input("Enter image path (e.g. sample.jpg): ")
+        results = count_tokens_for_image(file_path)
     else:
         file_path = input("Enter file path (e.g. sample.pdf or sample.py): ")
         results = count_tokens_for_file(file_path)
-    
+
     print(results)
