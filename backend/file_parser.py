@@ -1,4 +1,6 @@
 import fitz  # this is pymupdf's import name
+from docx import Document
+
 
 def extract_text_from_pdf(file_path: str) -> str:
     text = ""
@@ -13,9 +15,19 @@ def extract_text_from_code(file_path: str) -> str:
         return f.read()
 
 
+def extract_text_from_docx(file_path: str) -> str:
+    doc = Document(file_path)
+    text = ""
+    for paragraph in doc.paragraphs:
+        text += paragraph.text + "\n"
+    return text
+
+
 def extract_text_from_file(file_path: str) -> str:
     if file_path.endswith(".pdf"):
         return extract_text_from_pdf(file_path)
+    elif file_path.endswith(".docx"):
+        return extract_text_from_docx(file_path)
     elif file_path.endswith((".py", ".java", ".js", ".cpp", ".c", ".html", ".css", ".txt")):
         return extract_text_from_code(file_path)
     else:
