@@ -1,0 +1,36 @@
+{
+  "last_verified": null,
+  "note": "Prices are USD per 1 million tokens. Check each provider's pricing page, update the numbers below, then set last_verified to today's date, for example 2026-10-20.",
+  "platforms": {
+    "chatgpt": {
+      "name": "ChatGPT",
+      "model": "GPT-4o",
+      "input_per_million": 2.5,
+      "output_per_million": 10.0,
+      "approximate_tokens": false,
+      "free_tier": "The free plan has a limited number of messages per few hours. The limit changes with demand.",
+      "paid_tier": "Plus and Pro plans raise the message limits.",
+      "url": "https://chatgpt.com"
+    },
+    "claude": {
+      "name": "Claude",
+      "model": "Claude Sonnet",
+      "input_per_million": 3.0,
+      "output_per_million": 15.0,
+      "approximate_tokens": true,
+      "free_tier": "The free plan has a limited number of messages per time window. The limit resets periodically.",
+      "paid_tier": "Pro and Max plans raise the message limits.",
+      "url": "https://claude.ai"
+    },
+    "gemini": {
+      "name": "Gemini",
+      "model": "Gemini Flash",
+      "input_per_million": 0.3,
+      "output_per_million": 2.5,
+      "approximate_tokens": false,
+      "free_tier": "The free plan has daily usage limits that vary by model.",
+      "paid_tier": "Google AI Pro raises the limits.",
+      "url": "https://gemini.google.com"
+    }
+  }
+}
