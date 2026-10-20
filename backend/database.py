@@ -21,6 +21,7 @@ def save_session(
     title=None,
     files=None,
     results=None,
+    meta=None,
 ):
     files = files or []
     results = results or []
@@ -32,12 +33,13 @@ def save_session(
                 """
                 INSERT INTO sessions
                     (owner_id, title, prompt_text, compressed_prompt,
-                     recommended_platform, summary)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                     recommended_platform, summary, meta)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (owner_id, title, prompt_text, compressed_prompt,
-                 recommended_platform, summary),
+                 recommended_platform, summary,
+                 Jsonb(meta) if meta is not None else None),
             )
             session_id = cur.fetchone()["id"]
 
