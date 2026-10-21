@@ -1,3 +1,11 @@
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    google_sub TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id TEXT NOT NULL,
@@ -10,6 +18,8 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS meta JSONB;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS pinned_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS files (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -31,3 +41,7 @@ CREATE TABLE IF NOT EXISTS results (
 
 CREATE INDEX IF NOT EXISTS idx_sessions_owner_created
     ON sessions (owner_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_owner_active
+    ON sessions (owner_id, created_at DESC)
+    WHERE deleted_at IS NULL;

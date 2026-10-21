@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+psycopg[binary]
+tiktoken
+google-generativeai
+pymupdf
+python-docx
+Pillow
+authlib
+httpx
+itsdangerous
