@@ -74,11 +74,7 @@ def platform_cost(platform, input_tokens, output_tokens):
 
 
 def _platform_available(platform, tokens):
-    if tokens is None:
-        return False
-    if platform == "gemini" and not _gemini_configured():
-        return False
-    return True
+    return tokens is not None
 
 
 def _fit_score(platform, task):
@@ -92,15 +88,13 @@ def _pick_recommendation(priced_rows, task):
     max_fit = max(r["fit_score"] for r in priced_rows)
     top_fit = [r for r in priced_rows if r["fit_score"] >= max_fit - FIT_TIE_BAND]
 
-    def sort_key(r):
-        return (-r["fit_score"], r["est_cost_usd"])
-
-    ranked = sorted(top_fit, key=sort_key)
+    # Among similarly suitable providers, prefer lower estimated cost.
+    ranked = sorted(top_fit, key=lambda r: (r["est_cost_usd"], -r["fit_score"]))
     best = ranked[0]
     name = best["name"]
     reason = (
-        f"{name} ({best['model']}) is the best fit for this {task} task among "
-        f"available providers, with strong suitability and competitive estimated cost."
+        f"{name} ({best['model']}) is a strong fit for this {task} task and has the "
+        f"lowest estimated cost among suitable options (${best['est_cost_usd']:.4f})."
     )
 
     alternatives = []

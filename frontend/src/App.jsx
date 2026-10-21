@@ -18,7 +18,14 @@ import {
 } from "./api.js";
 
 export default function App() {
-  const { user, loading: authLoading, loginUrl, logout, isAdmin } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    loginUrl,
+    switchAccountUrl,
+    logout,
+    isAdmin,
+  } = useAuth();
   const [settings, setSettings] = useState(loadSettings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -166,22 +173,42 @@ export default function App() {
     if (el) el.focus();
   }
 
+  const sidebarHidden = settings.sidebarHidden;
+
+  async function switchGoogleAccount() {
+    await logout();
+    window.location.href = switchAccountUrl;
+  }
+
+  function showSidebar() {
+    updateSettings({ sidebarHidden: false });
+    setSidebarOpen(true);
+  }
+
+  function hideSidebar() {
+    updateSettings({ sidebarHidden: true });
+    setSidebarOpen(false);
+  }
+
   return (
-    <div className="app">
-      <Sidebar
-        sessions={sessions}
-        activeId={activeId}
-        authenticated={!!user}
-        onNew={newEstimate}
-        onSelect={openSession}
-        onDelete={removeSession}
-        onRename={onRenameSession}
-        onPin={onPinSession}
-        onOpenSettings={() => setSettingsOpen(true)}
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-      {sidebarOpen && (
+    <div className={"app" + (sidebarHidden ? " sidebar-collapsed" : "")}>
+      {!sidebarHidden && (
+        <Sidebar
+          sessions={sessions}
+          activeId={activeId}
+          authenticated={!!user}
+          onNew={newEstimate}
+          onSelect={openSession}
+          onDelete={removeSession}
+          onRename={onRenameSession}
+          onPin={onPinSession}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onHideSidebar={hideSidebar}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      )}
+      {!sidebarHidden && sidebarOpen && (
         <div className="scrim" onClick={() => setSidebarOpen(false)} />
       )}
 
@@ -196,18 +223,25 @@ export default function App() {
         settings={settings}
         onChangeSettings={updateSettings}
         onClearContext={() => setConversationContext([])}
+        switchAccountUrl={switchAccountUrl}
+        onSwitchAccount={switchGoogleAccount}
       />
 
       <main className="main">
         <header className="topbar">
           <button
             className="menu-btn"
-            aria-label="Open history"
-            onClick={() => setSidebarOpen(true)}
+            aria-label={sidebarHidden ? "Show sidebar" : "Open history"}
+            onClick={() => (sidebarHidden ? showSidebar() : setSidebarOpen(true))}
           >
             ☰
           </button>
           <span className="topbar-title">TokCost</span>
+          {sidebarHidden && (
+            <button type="button" className="ghost small" onClick={showSidebar}>
+              Show sidebar
+            </button>
+          )}
         </header>
 
         <div className="scroll">

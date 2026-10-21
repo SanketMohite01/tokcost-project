@@ -46,6 +46,7 @@ export function AuthProvider({ children }) {
         refresh,
         logout,
         loginUrl: getLoginUrl(),
+        switchAccountUrl: getLoginUrl({ pickAccount: true }),
         isAdmin: user?.role === "admin",
       }}
     >

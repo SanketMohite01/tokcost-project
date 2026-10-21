@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ACCEPT =
   ".pdf,.docx,.txt,.py,.java,.js,.cpp,.c,.html,.css,.png,.jpg,.jpeg,.webp,.gif";
@@ -8,8 +8,16 @@ const MAX_BYTES = 10 * 1024 * 1024;
 export default function Composer({ onSubmit, loading, value = "", onChange }) {
   const [files, setFiles] = useState([]);
   const [problem, setProblem] = useState("");
+  const [listening, setListening] = useState(false);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
   const text = value;
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.stop();
+    };
+  }, []);
 
   function setText(next) {
     if (onChange) onChange(next);
@@ -50,6 +58,38 @@ export default function Composer({ onSubmit, loading, value = "", onChange }) {
     }
   }
 
+  function toggleMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      setProblem("Speech input is not supported in this browser.");
+      return;
+    }
+    if (listening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setListening(false);
+      return;
+    }
+    const rec = new SR();
+    rec.lang = "en-US";
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.onresult = (event) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      if (transcript.trim()) {
+        setText(text.trim() ? `${text.trim()} ${transcript.trim()}` : transcript.trim());
+      }
+    };
+    rec.onerror = () => setProblem("Could not capture speech. Check microphone permission.");
+    rec.onend = () => setListening(false);
+    recognitionRef.current = rec;
+    setListening(true);
+    setProblem("");
+    rec.start();
+  }
+
   return (
     <div
       className="composer-wrap"
@@ -78,6 +118,25 @@ export default function Composer({ onSubmit, loading, value = "", onChange }) {
         )}
         <div className="composer-row">
           <button
+            type="button"
+            className={"icon-btn" + (listening ? " mic-active" : "")}
+            aria-label={listening ? "Stop microphone" : "Dictate prompt"}
+            onClick={toggleMic}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+              <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" />
+            </svg>
+          </button>
+          <button
+            type="button"
             className="icon-btn"
             aria-label="Attach files"
             onClick={() => inputRef.current.click()}

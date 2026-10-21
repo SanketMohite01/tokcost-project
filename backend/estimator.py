@@ -48,5 +48,9 @@ def add_totals(*token_dicts):
     totals = {}
     for p in PLATFORMS:
         values = [d[p] for d in token_dicts]
-        totals[p] = None if any(v is None for v in values) else sum(values)
+        nums = [v for v in values if v is not None]
+        if not nums:
+            totals[p] = None
+        else:
+            totals[p] = sum(nums)
     return totals

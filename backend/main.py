@@ -135,8 +135,10 @@ def auth_me(request: Request):
 
 
 @app.get("/auth/google/login")
-async def auth_google_login(request: Request):
-    return await auth.google_login(request)
+async def auth_google_login(request: Request, pick_account: bool = False):
+    if request.query_params.get("pick_account") in ("1", "true", "yes"):
+        pick_account = True
+    return await auth.google_login(request, pick_account=pick_account)
 
 
 @app.get("/auth/google/callback")

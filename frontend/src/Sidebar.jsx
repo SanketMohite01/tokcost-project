@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function groupLabel(iso) {
   const d = new Date(iso);
@@ -49,15 +49,25 @@ export default function Sidebar({
   onRename,
   onPin,
   onOpenSettings,
+  onHideSidebar,
   open,
   onClose,
 }) {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [menuId, setMenuId] = useState(null);
+  const [search, setSearch] = useState("");
 
-  const pinned = sessions.filter((s) => s.pinned_at);
-  const unpinned = sessions.filter((s) => !s.pinned_at);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return sessions;
+    return sessions.filter((s) =>
+      (s.title || "Untitled").toLowerCase().includes(q),
+    );
+  }, [sessions, search]);
+
+  const pinned = filtered.filter((s) => s.pinned_at);
+  const unpinned = filtered.filter((s) => !s.pinned_at);
 
   function buildGroups(list) {
     const groups = [];
@@ -147,14 +157,38 @@ export default function Sidebar({
 
   return (
     <aside className={"sidebar" + (open ? " open" : "")}>
-      <div className="brand">
-        <span className="brand-mark">T</span>
-        <span className="brand-name">TokCost</span>
+      <div className="brand-row">
+        <div className="brand">
+          <span className="brand-mark">T</span>
+          <span className="brand-name">TokCost</span>
+        </div>
+        <button
+          type="button"
+          className="sidebar-hide-btn"
+          title="Hide sidebar"
+          aria-label="Hide sidebar"
+          onClick={onHideSidebar}
+        >
+          ⟨
+        </button>
       </div>
 
       <button type="button" className="new-btn" onClick={onNew}>
         <span aria-hidden="true">+</span> New estimate
       </button>
+
+      {authenticated && (
+        <div className="history-search-wrap">
+          <input
+            type="search"
+            className="history-search"
+            placeholder="Search history…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search history"
+          />
+        </div>
+      )}
 
       <div className="history">
         {!authenticated && (
@@ -164,6 +198,9 @@ export default function Sidebar({
         )}
         {authenticated && sessions.length === 0 && (
           <p className="muted small pad">Your estimates will appear here.</p>
+        )}
+        {authenticated && sessions.length > 0 && filtered.length === 0 && (
+          <p className="muted small pad">No chats match your search.</p>
         )}
         {pinned.length > 0 && (
           <div>

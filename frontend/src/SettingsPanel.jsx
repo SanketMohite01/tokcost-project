@@ -13,6 +13,8 @@ export default function SettingsPanel({
   settings,
   onChangeSettings,
   onClearContext,
+  switchAccountUrl,
+  onSwitchAccount,
 }) {
   if (!open) return null;
 
@@ -37,6 +39,14 @@ export default function SettingsPanel({
             <span>Theme</span>
             <ThemeToggle />
           </div>
+          <label className="settings-check">
+            <input
+              type="checkbox"
+              checked={settings.sidebarHidden}
+              onChange={(e) => set("sidebarHidden", e.target.checked)}
+            />
+            Hide sidebar (more space for estimates)
+          </label>
         </section>
 
         <section className="settings-section">
@@ -55,6 +65,13 @@ export default function SettingsPanel({
               <button type="button" className="settings-btn" onClick={logout}>
                 Sign out
               </button>
+              <button
+                type="button"
+                className="settings-btn"
+                onClick={onSwitchAccount}
+              >
+                Sign in with another Google account
+              </button>
             </>
           ) : (
             <>
@@ -63,6 +80,9 @@ export default function SettingsPanel({
               </p>
               <a className="settings-btn primary" href={loginUrl}>
                 Sign in with Google
+              </a>
+              <a className="settings-btn" href={switchAccountUrl}>
+                Choose Google account…
               </a>
             </>
           )}

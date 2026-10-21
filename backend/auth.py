@@ -38,11 +38,12 @@ def _admin_emails():
     return {e.strip().lower() for e in raw.split(",") if e.strip()}
 
 
-async def google_login(request: Request):
+async def google_login(request: Request, pick_account: bool = False):
     if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
         raise HTTPException(status_code=503, detail="Google OAuth is not configured on the server.")
     redirect_uri = oauth_callback_uri(request)
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    extra = {"prompt": "select_account"} if pick_account else {}
+    return await oauth.google.authorize_redirect(request, redirect_uri, **extra)
 
 
 async def google_callback(request: Request):

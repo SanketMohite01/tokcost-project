@@ -4,6 +4,7 @@ const DEFAULTS = {
   contextEnabled: true,
   maxContextMessages: 8,
   contextCharBudget: 4000,
+  sidebarHidden: false,
 };
 
 export function loadSettings() {

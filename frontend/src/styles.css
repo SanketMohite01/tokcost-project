@@ -102,6 +102,47 @@ button {
   height: 100%;
   overflow: hidden;
 }
+.app.sidebar-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+.brand-row .brand {
+  padding-bottom: 0;
+}
+.sidebar-hide-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+}
+.sidebar-hide-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.history-search-wrap {
+  margin-top: 10px;
+}
+.history-search {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+}
+.icon-btn.mic-active {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
 
 /* Sidebar */
 .sidebar {

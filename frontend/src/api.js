@@ -28,8 +28,9 @@ async function request(path, options = {}) {
   return res.json();
 }
 
-export function getLoginUrl() {
-  return BASE + "/auth/google/login";
+export function getLoginUrl({ pickAccount = false } = {}) {
+  const q = pickAccount ? "?pick_account=1" : "";
+  return BASE + "/auth/google/login" + q;
 }
 
 export function authMe() {
