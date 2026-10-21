@@ -1,21 +1,12 @@
+// Must match OAUTH_REDIRECT_URI host (Option B: 127.0.0.1 everywhere).
 const BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-export function getOwnerId() {
-  let id = localStorage.getItem("tokcost_owner_id");
-  if (!id) {
-    id =
-      window.crypto && window.crypto.randomUUID
-        ? window.crypto.randomUUID()
-        : "u-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem("tokcost_owner_id", id);
-  }
-  return id;
-}
+const defaultFetch = { credentials: "include" };
 
 async function request(path, options = {}) {
   let res;
   try {
-    res = await fetch(BASE + path, options);
+    res = await fetch(BASE + path, { ...defaultFetch, ...options });
   } catch (e) {
     throw new Error(
       "Cannot reach the TokCost server. Check that the backend is running.",
@@ -33,32 +24,76 @@ async function request(path, options = {}) {
     }
     throw new Error(detail);
   }
+  if (res.status === 204) return null;
   return res.json();
 }
 
-export function estimate(ownerId, prompt, files) {
+export function getLoginUrl() {
+  return BASE + "/auth/google/login";
+}
+
+export function authMe() {
+  return request("/auth/me");
+}
+
+export function logout() {
+  return request("/auth/logout", { method: "POST" });
+}
+
+export function estimate(prompt, files, contextMessages) {
   const form = new FormData();
   form.append("prompt", prompt);
   files.forEach((f) => form.append("files", f));
-  return request("/estimate", {
-    method: "POST",
-    headers: { "x-owner-id": ownerId },
-    body: form,
+  if (contextMessages && contextMessages.length > 0) {
+    form.append("context_json", JSON.stringify(contextMessages));
+  }
+  return request("/estimate", { method: "POST", body: form });
+}
+
+export function listSessions() {
+  return request("/sessions");
+}
+
+export function getSession(id) {
+  return request("/sessions/" + id);
+}
+
+export function updateSession(id, { title, pinned } = {}) {
+  const body = {};
+  if (title !== undefined) body.title = title;
+  if (pinned !== undefined) body.pinned = pinned;
+  return request("/sessions/" + id, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
 }
 
-export function listSessions(ownerId) {
-  return request("/sessions", { headers: { "x-owner-id": ownerId } });
+export function renameSession(id, title) {
+  return updateSession(id, { title });
 }
 
-export function getSession(ownerId, id) {
-  return request("/sessions/" + id, { headers: { "x-owner-id": ownerId } });
+export function pinSession(id, pinned) {
+  return updateSession(id, { pinned });
 }
 
-export function deleteSession(ownerId, id) {
-  return request("/sessions/" + id, {
-    method: "DELETE",
-    headers: { "x-owner-id": ownerId },
+export function deleteSession(id) {
+  return request("/sessions/" + id, { method: "DELETE" });
+}
+
+export function adminStats() {
+  return request("/admin/stats");
+}
+
+export function adminListUsers() {
+  return request("/admin/users");
+}
+
+export function adminSetRole(userId, role) {
+  return request("/admin/users/" + userId, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
   });
 }
 
@@ -77,6 +112,7 @@ export function viewFromEstimate(data, prompt, files) {
     platforms: data.platforms,
     recommended: data.recommended,
     reason: data.reason,
+    alternatives: data.alternatives || [],
     summary: data.summary,
     pricingLastVerified: data.pricing_last_verified,
   };
@@ -90,6 +126,9 @@ export function viewFromSession(s) {
     compressed_tokens: 0,
     saved_tokens: 0,
     percent: 0,
+    summary: "",
+    context_messages_used: 0,
+    retained_notes: [],
   };
   return {
     sessionId: s.id,
@@ -105,6 +144,7 @@ export function viewFromSession(s) {
     platforms: meta.platforms || [],
     recommended: s.recommended_platform,
     reason: meta.reason || "",
+    alternatives: meta.alternatives || [],
     summary: s.summary || "",
     pricingLastVerified: meta.pricing_last_verified || null,
   };

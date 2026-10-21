@@ -101,8 +101,24 @@ cd tokcost-project
 
 Install required dependencies:
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
+
+### Authentication (Google OAuth)
+
+Backend environment variables (use a local `.env` file, never commit secrets):
+
+| Variable | Purpose |
+|----------|---------|
+| `SECRET_KEY` | Signs session cookies |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth client |
+| `OAUTH_REDIRECT_URI` | e.g. `http://127.0.0.1:8000/auth/google/callback` |
+| `FRONTEND_URL` | e.g. `http://localhost:5173` (must match a CORS origin) |
+| `ADMIN_EMAILS` | Comma-separated emails granted `admin` on **first** login only |
+
+**Google Cloud Console:** Create an OAuth 2.0 Web client. Authorized JavaScript origins: your `FRONTEND_URL`. Authorized redirect URI: `OAUTH_REDIRECT_URI`. Use the same host for API calls as in redirect (prefer `127.0.0.1` or `localhost` consistently).
+
+Run the API from the `backend` folder: `uvicorn main:app --reload`. Frontend: `npm run dev` in `frontend/`.
 
 ### Required Packages
 - `tiktoken` - Token counting for OpenAI models

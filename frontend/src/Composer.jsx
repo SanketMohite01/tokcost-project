@@ -5,11 +5,15 @@ const ACCEPT =
 const MAX_FILES = 5;
 const MAX_BYTES = 10 * 1024 * 1024;
 
-export default function Composer({ onSubmit, loading }) {
-  const [text, setText] = useState("");
+export default function Composer({ onSubmit, loading, value = "", onChange }) {
   const [files, setFiles] = useState([]);
   const [problem, setProblem] = useState("");
   const inputRef = useRef(null);
+  const text = value;
+
+  function setText(next) {
+    if (onChange) onChange(next);
+  }
 
   function addFiles(list) {
     const incoming = Array.from(list);

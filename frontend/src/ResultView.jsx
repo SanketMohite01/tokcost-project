@@ -1,9 +1,8 @@
-import { useState } from "react";
+import PlatformCard from "./PlatformCard.jsx";
+import CompressionCard from "./CompressionCard.jsx";
 
 const fmt = (n) =>
   n === null || n === undefined ? "n/a" : Number(n).toLocaleString();
-const money = (n) =>
-  n === null || n === undefined ? "n/a" : "$" + Number(n).toFixed(4);
 
 function Stat({ label, value }) {
   return (
@@ -14,45 +13,7 @@ function Stat({ label, value }) {
   );
 }
 
-function PlatformCard({ p, best }) {
-  const unavailable = p.input_tokens === null || p.input_tokens === undefined;
-  return (
-    <div className={"pcard" + (best ? " best" : "")}>
-      <div className="pcard-top">
-        <span className="pname">{p.name}</span>
-        {best && <span className="badge">Best fit</span>}
-      </div>
-      <div className="pmodel muted small">{p.model}</div>
-      {unavailable ? (
-        <div className="pcost small">Token count unavailable right now</div>
-      ) : (
-        <>
-          <div className="pcost">{money(p.est_cost_usd)}</div>
-          <div className="small muted">
-            {fmt(p.input_tokens)} input tokens
-            {p.approximate_tokens ? " (approx.)" : ""}
-          </div>
-          <div className="small muted">
-            about {fmt(p.est_output_tokens)} output tokens
-          </div>
-        </>
-      )}
-      <div className="small muted tier">{p.free_tier}</div>
-      <div className="small muted">{p.paid_tier}</div>
-      <a
-        className="plink"
-        href={p.url}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Open {p.name} ↗
-      </a>
-    </div>
-  );
-}
-
-export default function ResultView({ view }) {
-  const [copied, setCopied] = useState(false);
+export default function ResultView({ view, onUsePrompt }) {
   const rec = view.recommended;
   const promptTok = rec ? view.promptTokens[rec] : null;
   const totalTok = rec ? view.totals[rec] : null;
@@ -66,31 +27,10 @@ export default function ResultView({ view }) {
   const comp = view.compression || {};
   const hasPrompt = view.userMessage.text.trim().length > 0;
 
-  async function copyCompressed() {
-    const text = comp.compressed || "";
-    let ok = false;
-    try {
-      await navigator.clipboard.writeText(text);
-      ok = true;
-    } catch (e) {
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        ok = document.execCommand("copy");
-        document.body.removeChild(ta);
-      } catch (e2) {
-        ok = false;
-      }
-    }
-    if (ok) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }
-  }
+  const altMap = {};
+  (view.alternatives || []).forEach((a) => {
+    altMap[a.platform] = a.reason;
+  });
 
   return (
     <div className="thread">
@@ -110,6 +50,17 @@ export default function ResultView({ view }) {
       <div className="answer">
         <p className="lead">{view.reason}</p>
 
+        {(view.alternatives || []).length > 0 && (
+          <div className="alternatives panel">
+            <div className="panel-title">Alternatives</div>
+            <ul className="small muted">
+              {view.alternatives.map((a) => (
+                <li key={a.platform}>{a.reason}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="stats">
           <Stat label="Prompt tokens" value={fmt(promptTok)} />
           <Stat label="File tokens" value={fmt(fileTok)} />
@@ -121,29 +72,18 @@ export default function ResultView({ view }) {
 
         <div className="pgrid">
           {view.platforms.map((p) => (
-            <PlatformCard key={p.platform} p={p} best={p.platform === rec} />
+            <PlatformCard
+              key={p.platform}
+              p={p}
+              best={p.platform === rec}
+              reason={p.platform === rec ? view.reason : undefined}
+              alternativeReason={altMap[p.platform]}
+            />
           ))}
         </div>
 
         {hasPrompt && (
-          <div className="panel">
-            <div className="panel-head">
-              <span className="panel-title">Compressed prompt</span>
-              <button className="ghost" onClick={copyCompressed}>
-                {copied ? "Copied" : "Copy"}
-              </button>
-            </div>
-            <div className="panel-body">{comp.compressed}</div>
-            <div className="small muted">
-              {comp.saved_tokens > 0
-                ? "Saves " +
-                  comp.saved_tokens +
-                  (comp.saved_tokens === 1 ? " token (" : " tokens (") +
-                  comp.percent +
-                  "%) on the prompt."
-                : "This prompt is already concise."}
-            </div>
-          </div>
+          <CompressionCard compression={comp} onUsePrompt={onUsePrompt} />
         )}
 
         {view.files.length > 0 && (
@@ -188,7 +128,7 @@ export default function ResultView({ view }) {
           {view.pricingLastVerified
             ? "Prices last verified " + view.pricingLastVerified + "."
             : "Costs use the prices in pricing_config.json. Verify them before relying on the numbers."}
-          {view.saved ? "" : " This estimate was not saved to history."}
+          {view.saved === false && " This estimate was not saved (sign in to save history)."}
         </p>
       </div>
     </div>
