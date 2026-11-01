@@ -4,4 +4,5 @@ __pycache__/
 *.pyc
 .DS_Store
 venv/
+run-test.py
 dist/
