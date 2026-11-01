@@ -1,10 +1,12 @@
 # tokcost-project
+
 # TokCost Project
 
 Cross-platform token and cost estimation framework for ChatGPT, Claude, and Gemini.
 
 ## About
-This project helps users estimate token usage and cost across multiple AI platforms 
+
+This project helps users estimate token usage and cost across multiple AI platforms
 before submitting a prompt, and recommends the most suitable platform for their task.
 
 ## Features
@@ -19,6 +21,7 @@ before submitting a prompt, and recommends the most suitable platform for their 
 The **Prompt Compressor** (`backend/compressor.py`) is an enterprise-grade module that intelligently reduces prompt size while maintaining semantic integrity and protecting critical information.
 
 ### Features
+
 - **Hybrid Compression Strategy**: Combines AST/Regex Tensor Masking with LLMLingua-2 Extractive Token Pruning
 - **Intelligent Content Protection**: Automatically preserves code blocks, JSON schemas, Markdown tables, and logical constraints
 - **Configurable Compression Rate**: Customize target compression ratios (default: 50%)
@@ -33,13 +36,13 @@ The `ProductionPromptCompressor` class implements:
 
 1. **Model Initialization**: Lazy-loads Microsoft LLMLingua-2 (bert-base-multilingual-cased-meetingbank) on available device (CUDA/CPU)
 2. **Content Protection**: Masks critical elements before compression:
-   - Code blocks (```...```)
+   - Code blocks (`...`)
    - JSON structures ({...})
    - Markdown tables (|...|)
    - Logical constraints (IF, THEN, ELSE, REQUIRE, ALWAYS, NEVER)
 3. **Token Pruning**: Applies information entropy-based pruning via LLMLingua-2
 4. **Content Restoration**: Unmasks protected elements into the final compressed prompt
-5. **Safety Circuits**: 
+5. **Safety Circuits**:
    - Skips compression for prompts under 30 tokens
    - Validates compression doesn't inflate token count
    - Falls back to original prompt if compression fails
@@ -84,9 +87,11 @@ print(result)
   }
 }
 ```
+
 ## Installation
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - pip (Python package manager)
 - CUDA 11.0+ (optional, for GPU acceleration)
@@ -94,17 +99,36 @@ print(result)
 ### Setup
 
 Clone the repository:
+
 ```bash
 git clone https://github.com/SanketMohite01/tokcost-project.git
 cd tokcost-project
 ```
 
 Install required dependencies:
+
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
+### Authentication (Google OAuth)
+
+Backend environment variables (use a local `.env` file, never commit secrets):
+
+| Variable                                    | Purpose                                                        |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `SECRET_KEY`                                | Signs session cookies                                          |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth client                                            |
+| `OAUTH_REDIRECT_URI`                        | e.g. `http://127.0.0.1:8000/auth/google/callback`              |
+| `FRONTEND_URL`                              | e.g. `http://localhost:5173` (must match a CORS origin)        |
+| `ADMIN_EMAILS`                              | Comma-separated emails granted `admin` on **first** login only |
+
+**Google Cloud Console:** Create an OAuth 2.0 Web client. Authorized JavaScript origins: your `FRONTEND_URL`. Authorized redirect URI: `OAUTH_REDIRECT_URI`. Use the same host for API calls as in redirect (prefer `127.0.0.1` or `localhost` consistently).
+
+Run the API from the `backend` folder: `uvicorn main:app --reload`. Frontend: `npm run dev` in `frontend/`.
+
 ### Required Packages
+
 - `tiktoken` - Token counting for OpenAI models
 - `torch` - PyTorch for GPU detection and tensor operations
 - `llmlingua` - Microsoft LLMLingua-2 for prompt compression
@@ -122,18 +146,21 @@ We welcome contributions! Here's how to get started:
 6. **Open a Pull Request** with a clear description
 
 ### Development Workflow
+
 - Keep commits atomic and focused
 - Write clear commit messages using conventional commits
 - Test all changes before submitting PRs
 - Ensure code is well-documented
 
 ## Collaborators
+
 - **Sanket Mohite** (SanketMohite01) - Project Owner
 - **Sarthak Deshmukh** (sarthakkkk7) - Co-Contributor
 
 ## Getting Started
 
 Everyone (including you) should now clone the repo locally:
+
 ```bash
 git clone https://github.com/SanketMohite01/tokcost-project.git
 cd tokcost-project
